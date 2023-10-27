@@ -1,0 +1,19 @@
+import sqlite3
+
+con = sqlite3.connect('school.sqlite')
+cur = con.cursor()
+
+que_create = '''
+INSERT INTO class (name, surname, mark) VALUES
+    ('Василий', 'Пупкин', 3),
+    ('Денис', 'Синицан', 4),
+    ('Ангелина', 'Соколова', 5),
+    ('Саша', 'Петров', 2)
+'''
+
+cur.execute(que_create)
+con.commit()
+
+con.close()
+
+
