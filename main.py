@@ -1,24 +1,21 @@
 import pygame as pg
 from sql_bd import DateBaseSQL
 import random
-
-bd = DateBaseSQL
-clock = pg.time.Clock()
-apl = pg.image.load('')
-a = pg.image.load('')
-pga = pg.image.load('')
 pg.init()
+apl = pg.image.load('apl.png')
+a = pg.image.load('sh.jpg')
+pga = pg.image.load('O.jpg')
+sound1 = pg.mixer.music.load("foot.mp3")
 font_name = pg.font.match_font('arial')  # поиск шифта arial
 size = 18  # размер шрифта
 W, H = 600, 600
 win = pg.display.set_mode((W, H))  # переменная чтобы создать игровое окно
 name = ' '
 
-
 class Apple(pg.sprite.Sprite):
     def __init__(self, x, y):
         pg.sprite.Sprite.__init__(self)
-        self.image = pg.image.load('')
+        self.image = pg.image.load('apl.png')
         self.rect = self.image.get_rect()
         self.rect.centerx = random.randrange(0, 570)
         self.rect.bottom = random.randrange(0, 570)
@@ -35,12 +32,16 @@ class Player(pg.sprite.Sprite):
         self.y = y
         self.speed_x = 1
         self.speed_y = 0
-        self.image = pg.image.load('zm.png')
+        self.image = pg.image.load('po.jpg')
+        self.image = pg.transform.scale(self.image, (50, 50))
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
 
     def update(self):
+        if cellision:
+            self.rect.x += self.speed_x * 40
+            self.rect.y += self.speed_y * 40
         self.rect.x += self.speed_x
         self.rect.y += self.speed_y
         key = pg.key.get_pressed()
@@ -71,11 +72,12 @@ class Player(pg.sprite.Sprite):
 
 
 class Tail(pg.sprite.Sprite):
-    def __init__(self, *group):
+    def __init__(self, event=None, *group):
         super().__init__(*group)
         self.speed_x = player.speed_x
         self.speed_y = player.speed_y
-        self.image = pg.image.load('zm.png')
+        self.image = pg.image.load('po.jpg')
+        self.image = pg.transform.scale(self.image, (50, 50))
         self.rect = self.image.get_rect()
         self.rect.x = player.rect.x
         self.rect.y = player.rect.y
@@ -96,6 +98,7 @@ class Tail(pg.sprite.Sprite):
         self.update()
 
 
+cellision = False
 all_sprites = pg.sprite.Group()
 apple = Apple(50, 50)
 apple_sprites = pg.sprite.Group()
@@ -120,7 +123,7 @@ def user_name(surf, text, x, y, size, color=(255, 255, 255)):
     text_rect.midtop = (x, y)
     surf.blit(text_surface, text_rect)
 
-
+clock = pg.time.Clock()
 mainloop = True
 while mainloop:
     for i in pg.event.get():
@@ -149,6 +152,11 @@ while 1:
     all_sprites.draw(win)
     clock.tick(60)
     str(score)
+    collision = pg.sprite.spritecollide(player,apple_sprites,False,pg.sprite.collide_mask)
+    happy_end = pg.sprite.spritecollide(player,tail_sprites,False,pg.sprite.collide_mask)
+    if happy_end:
+        break
+
 
     for vertic in range(0, 600, 20):
         pg.draw.line(win, (255, 0, 0), (0, vertic), (600, vertic))
@@ -181,10 +189,10 @@ while 1:
     step = 0
     for u_name, u_score in SQL.get():
         step += 1
-        draw_text(win, (f'{u_name}: {u_score}'), WIDTH // 2 - 10, HEIGHT - 180 - offset * 2)
+        draw_text(win, (f'{u_name}: {u_score}'), W // 2 - 10, H - 180 - offset * 2)
         offset -= 20
     step = 0
-    draw_text(win, 'Game Over', WIDTH // 2, HEIGHT - 450)
-    draw_text(win, f'Ввш результать: {score}', WIDTH // 2, HEIGHT // 2)
-    draw_text(win, 'Best scores:', WIDTH // 2, HEIGHT - 250)
+    draw_text(win, 'Game Over', W // 2, H - 450)
+    draw_text(win, f'Ввш результать: {score}', W // 2, H // 2)
+    draw_text(win, 'Best scores:', W // 2, H - 250)
     pg.display.flip()
